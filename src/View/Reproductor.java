@@ -2,8 +2,11 @@ package View;
 
 import com.sun.jna.Native;
 import com.sun.jna.NativeLibrary;
+import java.awt.Canvas;
 import java.awt.Image;
 import java.awt.Toolkit;
+import java.awt.image.BufferedImage;
+import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -25,12 +28,18 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.imageio.ImageIO;
 import javax.swing.DefaultListModel;
+import javax.swing.JDesktopPane;
+import uk.co.caprica.vlcj.binding.internal.libvlc_media_t;
+import uk.co.caprica.vlcj.player.MediaPlayerFactory;
 
 public class Reproductor extends javax.swing.JFrame {
 
+    private final MediaPlayerFactory factory;
     private final EmbeddedMediaPlayerComponent player;
     private final ArrayList<File> list;
     private boolean band = true;
@@ -47,7 +56,7 @@ public class Reproductor extends javax.swing.JFrame {
     Boolean statusFim = true;
     Boolean statusLista = false;
     Boolean statusFerramentas = false;
-
+    private Image image;
     ///-----------------------------------------------------------///
     private final DefaultListModel model;
 
@@ -69,6 +78,7 @@ public class Reproductor extends javax.swing.JFrame {
         initComponents();
         jPanel1.setVisible(false);
         jPanel3.setVisible(false);
+//        imagem1.setVisible(false);
 
         NativeLibrary.addSearchPath(RuntimeUtil.getLibVlcLibraryName(), vlc);
         Native.loadLibrary(RuntimeUtil.getLibVlcLibraryName(), LibVlc.class);
@@ -85,6 +95,9 @@ public class Reproductor extends javax.swing.JFrame {
         jList1.setModel(model);
         jList1.setSelectedIndex(0);
         ///-----------------------------------------------------------///
+        factory = new MediaPlayerFactory();
+//        player = factory.newEmbeddedMediaPlayer();
+//        player.setVideoSurface(factory.newVideoSurface(vs));
         //Listener para acompanhar a reprodução no jSlideProgresso
         player.getMediaPlayer().addMediaPlayerEventListener(new MediaPlayerEventAdapter() {
             @Override
@@ -162,6 +175,24 @@ public class Reproductor extends javax.swing.JFrame {
                 }
             }
 
+            @Override
+            public void buffering(MediaPlayer mediaPlayer, float newCache) {
+                System.out.println("Buffering " + newCache);
+                if (newCache <= 0.0) {
+//                    imagem1.setVisible(true);
+                } else {
+//                    imagem1.setVisible(false);
+                }
+            }
+
+            @Override
+            public void mediaSubItemAdded(MediaPlayer mediaPlayer, libvlc_media_t subItem) {
+                List<String> items = mediaPlayer.subItems();
+                System.out.println(items);
+
+                System.out.println("items " + items);
+//                player.getMediaPlayer().playMedia(""+items);
+            }
         });
 
     }
@@ -204,7 +235,7 @@ public class Reproductor extends javax.swing.JFrame {
         jMenuRemover = new javax.swing.JMenuItem();
         jPopupMenuList = new javax.swing.JPopupMenu();
         jMenuList = new javax.swing.JMenuItem();
-        panelReprodutor = new javax.swing.JPanel();
+        panelReprodutor = new imagem.Imagem();
         jToolBar1 = new javax.swing.JToolBar();
         btnPlay = new javax.swing.JButton();
         btnStop = new javax.swing.JButton();
@@ -240,6 +271,7 @@ public class Reproductor extends javax.swing.JFrame {
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu5 = new javax.swing.JMenu();
         menuOpen = new javax.swing.JMenuItem();
+        jMenuItem2 = new javax.swing.JMenuItem();
         jMenu6 = new javax.swing.JMenu();
         jMenuItem3 = new javax.swing.JMenuItem();
         jMenuItem5 = new javax.swing.JMenuItem();
@@ -272,26 +304,16 @@ public class Reproductor extends javax.swing.JFrame {
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Legendador");
         setMinimumSize(new java.awt.Dimension(500, 400));
-
-        panelReprodutor.setMinimumSize(new java.awt.Dimension(100, 100));
-        panelReprodutor.setNextFocusableComponent(this);
-        panelReprodutor.setPreferredSize(new java.awt.Dimension(400, 300));
-        panelReprodutor.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                panelReprodutorMouseClicked(evt);
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosed(java.awt.event.WindowEvent evt) {
+                formWindowClosed(evt);
             }
         });
 
-        javax.swing.GroupLayout panelReprodutorLayout = new javax.swing.GroupLayout(panelReprodutor);
-        panelReprodutor.setLayout(panelReprodutorLayout);
-        panelReprodutorLayout.setHorizontalGroup(
-            panelReprodutorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 275, Short.MAX_VALUE)
-        );
-        panelReprodutorLayout.setVerticalGroup(
-            panelReprodutorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 0, Short.MAX_VALUE)
-        );
+        panelReprodutor.setBackground(new java.awt.Color(204, 204, 255));
+        panelReprodutor.setIcon(null);
+        panelReprodutor.setOpaque(false);
+        panelReprodutor.setLayout(new java.awt.BorderLayout());
 
         jToolBar1.setBorder(javax.swing.BorderFactory.createEtchedBorder());
         jToolBar1.setFloatable(false);
@@ -638,7 +660,7 @@ public class Reproductor extends javax.swing.JFrame {
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 288, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
@@ -670,14 +692,14 @@ public class Reproductor extends javax.swing.JFrame {
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 89, Short.MAX_VALUE)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                 .addContainerGap())
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane2)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 392, Short.MAX_VALUE)
                 .addGap(19, 19, 19))
         );
 
@@ -693,6 +715,14 @@ public class Reproductor extends javax.swing.JFrame {
             }
         });
         jMenu5.add(menuOpen);
+
+        jMenuItem2.setText("Abrir URL YouTube");
+        jMenuItem2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem2ActionPerformed(evt);
+            }
+        });
+        jMenu5.add(jMenuItem2);
 
         jMenuBar1.add(jMenu5);
 
@@ -796,61 +826,37 @@ public class Reproductor extends javax.swing.JFrame {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jToolBar1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(layout.createSequentialGroup()
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jToolBar2, javax.swing.GroupLayout.DEFAULT_SIZE, 390, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(panelReprodutor, javax.swing.GroupLayout.DEFAULT_SIZE, 275, Short.MAX_VALUE))))
+                        .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(panelReprodutor, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGap(0, 0, 0))
+                    .addComponent(jToolBar2, javax.swing.GroupLayout.DEFAULT_SIZE, 644, Short.MAX_VALUE)))
+            .addComponent(jToolBar1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(panelReprodutor, javax.swing.GroupLayout.DEFAULT_SIZE, 422, Short.MAX_VALUE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jToolBar2, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(0, 0, 0)
+                                .addComponent(panelReprodutor, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGap(6, 6, 6)
+                        .addComponent(jToolBar2, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGap(6, 6, 6)
                 .addComponent(jToolBar1, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
         pack();
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
-
-    private void menuOpenActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuOpenActionPerformed
-        JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setDialogTitle("Arquivos de video...");
-        String[] ext = {"mp4", "mpeg", "avi", "flv", "webm", "mkv", "rmvb"};
-        FileNameExtensionFilter filter = new FileNameExtensionFilter("Arquivos de Videos", ext);
-        fileChooser.setFileFilter(filter);
-        fileChooser.setMultiSelectionEnabled(true);
-        fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-
-        if (fileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-            File[] files = fileChooser.getSelectedFiles();
-            list.addAll(Arrays.asList(files));
-            //--------adiciona--------
-            jList1.setModel(model);
-            model.clear();
-            list.stream().forEach((f) -> {
-                model.addElement(f.getAbsolutePath());
-            });
-            System.out.println("list = " + list);
-            jList1.setSelectedIndex(0);
-            //  --------
-            Habilitar(true);
-            setTitle("Legendador - " + list.get(playing).getName());
-        }
-
-    }//GEN-LAST:event_menuOpenActionPerformed
 
     private void menuSnapActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuSnapActionPerformed
         JFileChooser fileChooser = new JFileChooser();
@@ -898,7 +904,6 @@ public class Reproductor extends javax.swing.JFrame {
     private void btnPlayActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPlayActionPerformed
         try {
             if (statusVideo.equals("pause")) {
-
                 switch ("" + player.getMediaPlayer().getMediaPlayerState()) {
                     //se o vido ainda não foi caregado
                     case "libvlc_NothingSpecial":
@@ -1139,26 +1144,6 @@ public class Reproductor extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_jFFimKeyPressed
 
-    private void panelReprodutorMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_panelReprodutorMouseClicked
-        jDialogMensagem = new JDialogMensagem(null, true);
-        jDialogMensagem.showMessage("Aviso", "O campo de legenda não pode ser vazio", "AVISO", "PADRAO");
-        jDialogMensagem.setVisible(true);
-        if (statusVideo.equals("pause")) {
-            btnPlay.setIcon(new javax.swing.ImageIcon(getClass().getResource("/img/pasue.png")));
-            statusVideo = "play";
-//            play();
-//            String reprod = list.get(playing).getAbsolutePath();
-//            player.getMediaPlayer().playMedia(reprod);
-//            player.getMediaPlayer().play();
-
-        } else if (statusVideo.equals("play")) {
-            btnPlay.setIcon(new javax.swing.ImageIcon(getClass().getResource("/img/play.png")));
-            statusVideo = "pause";
-            player.getMediaPlayer().setPause(player.getMediaPlayer().isPlaying());
-        }
-
-    }//GEN-LAST:event_panelReprodutorMouseClicked
-
     private void jMenuItem3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem3ActionPerformed
         // Limpa e adiciona a primeira legenda
         DefaultTableModel modelo = (DefaultTableModel) jTable1.getModel();
@@ -1379,6 +1364,79 @@ public class Reproductor extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_jList1MouseClicked
 
+    private void menuOpenActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuOpenActionPerformed
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Arquivos de video...");
+        String[] ext = {"mp4", "mpeg", "avi", "flv", "webm", "mkv", "rmvb"};
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("Arquivos de Videos", ext);
+        fileChooser.setFileFilter(filter);
+        fileChooser.setMultiSelectionEnabled(true);
+        fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+
+        if (fileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+            File[] files = fileChooser.getSelectedFiles();
+            list.addAll(Arrays.asList(files));
+            //--------adiciona--------
+            jList1.setModel(model);
+            model.clear();
+            list.stream().forEach((f) -> {
+                model.addElement(f.getAbsolutePath());
+            });
+            System.out.println("list = " + list);
+            jList1.setSelectedIndex(0);
+            //  --------
+            Habilitar(true);
+            setTitle("Legendador - " + list.get(playing).getName());
+        }
+    }//GEN-LAST:event_menuOpenActionPerformed
+
+    private void jMenuItem2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem2ActionPerformed
+        jDialogMensagem = new JDialogMensagem(null, true);
+        jDialogMensagem.showMessage("Error", "Funcionalidade em desenvolvimento", "INFORMACAO", "PADRAO");
+        jDialogMensagem.setVisible(true);
+        try {
+            String url = "";
+            jDialogMensagem = new JDialogMensagem(null, true);
+            jDialogMensagem.showMessage("Video do YouTube", "Informe a a URL do YouTube!", "AJUDA", "ENTRADA");
+            jDialogMensagem.setVisible(true);
+            if (jDialogMensagem.getSTATUS().equals("OK")) {
+                url = jDialogMensagem.getENTRADA();
+                System.out.println("===== getMediaPlayerState : " + player.getMediaPlayer().getMediaPlayerState());
+
+                String[] videoID = url.split("=");
+                String[] thumbnailvideoID = videoID[1].split("&");
+                URL thumbnailURL = new URL("https://i.ytimg.com/vi/" + thumbnailvideoID[0] + "/mqdefault.jpg");
+                String thumbnailURL2 = thumbnailURL.toString();
+
+//                jLabel4.setText(thumbnailvideoID[0]);
+//                jLabel4.setIcon(new javax.swing.ImageIcon(thumbnailURL));
+//                player.getMediaPlayer().setLogoImage((RenderedImage) new ImageIcon(thumbnailURL));
+                player.getMediaPlayer().setLogoFile(thumbnailURL2);
+                factory.release();
+                player.getMediaPlayer().setPlaySubItems(true);// <--- This is very important for YouTube media
+                player.getMediaPlayer().playMedia(url);
+                slideVolume.setValue(player.getMediaPlayer().getVolume());
+                slideProgresso.setEnabled(true);
+                menuSnap.setEnabled(true);
+
+                panelReprodutor.setIcon(new ImageIcon(thumbnailURL));
+                Habilitar(true);
+                System.out.println("----getMediaPlayerState : " + player.getMediaPlayer().getMediaPlayerState());
+            } else {
+                url = "";
+            }
+        } catch (Exception e) {
+            jDialogMensagem = new JDialogMensagem(null, true);
+            jDialogMensagem.showMessage("Error", "Verifique a URL digitada \n Error: \n " + e, "ERRO", "PADRAO");
+            jDialogMensagem.setVisible(true);
+        }
+    }//GEN-LAST:event_jMenuItem2ActionPerformed
+
+    private void formWindowClosed(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosed
+        player.release();
+        factory.release();
+    }//GEN-LAST:event_formWindowClosed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnLegenda;
     private javax.swing.JButton btnList;
@@ -1407,6 +1465,7 @@ public class Reproductor extends javax.swing.JFrame {
     private javax.swing.JMenu jMenu8;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JMenuItem jMenuItem1;
+    private javax.swing.JMenuItem jMenuItem2;
     private javax.swing.JMenuItem jMenuItem3;
     private javax.swing.JMenuItem jMenuItem5;
     private javax.swing.JMenuItem jMenuList;
@@ -1429,7 +1488,7 @@ public class Reproductor extends javax.swing.JFrame {
     private javax.swing.JMenuItem menuOpen;
     private javax.swing.JMenuItem menuPause;
     private javax.swing.JMenuItem menuSnap;
-    private javax.swing.JPanel panelReprodutor;
+    private imagem.Imagem panelReprodutor;
     private javax.swing.JSlider slideProgresso;
     private javax.swing.JSlider slideVolume;
     // End of variables declaration//GEN-END:variables
@@ -1470,4 +1529,5 @@ public class Reproductor extends javax.swing.JFrame {
         int seconds = remainder;
         return String.format("%d:%02d:%02d", hours, minutes, seconds);
     }
+
 }
